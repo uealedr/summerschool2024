@@ -1,3 +1,5 @@
+import random
+
 from otree.api import *
 
 
@@ -12,6 +14,7 @@ class C(BaseConstants):
     NUM_ROUNDS = 1
     ENDOWMENT = 20
     EXCHANGE_VALUE = Currency(1)
+    PRIZE = Currency(20)
 
 
 class Subsession(BaseSubsession):
@@ -29,17 +32,28 @@ class Group(BaseGroup):
         for player in self.get_players():
             player.setup_round()
 
+    def determine_outcome(self):
+        tickets = []
+        for player in self.get_players():
+            for _ in range(player.tickets_entered):
+                tickets.append(player)
+        self.ticket_drawn = random.randint(1, len(tickets))
+        tickets[self.ticket_drawn - 1].amount_won = C.PRIZE
+
 
 class Player(BasePlayer):
     endowment = models.IntegerField()
     exchange_value = models.CurrencyField()
     tickets_entered = models.IntegerField()
-    amount_won = models.CurrencyField()
+    amount_won = models.CurrencyField(initial=Currency(0))
 
     def setup_round(self):
         self.endowment = C.ENDOWMENT
         self.exchange_value = C.EXCHANGE_VALUE
 
+    @property
+    def other_player(self):
+        return self.get_others_in_group()[0]
 
 def creating_session(subsession: Subsession):
     subsession.setup_round()
@@ -55,7 +69,9 @@ class EnterTickets(Page):
 
 
 class ResultsWaitPage(WaitPage):
-    pass
+    @staticmethod
+    def after_all_players_arrive(group):
+        group.determine_outcome()
 
 
 class Results(Page):

@@ -5,7 +5,9 @@
 {{ block content }}
 
     You entered {{ player.tickets_entered }} tickets.
-
+    The other player entered {{ player.other_player.tickets_entered }} tickets.
+    The winning ticket number was {{ group.ticket_drawn }}.
+    Your prize: {{ player.amount_won }}.
     {{ next_button }}
 {{ endblock }}
 
