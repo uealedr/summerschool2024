@@ -35,6 +35,11 @@ class Group(BaseGroup):
             reference[letter] = self.table.index(letter) + 1
         return reference
 
+    @property
+    def correct_answer(self):
+        reference = self.reference_table
+        return [reference[letter] for letter in self.word]
+
 
 class Player(BasePlayer):
     response_1 = models.IntegerField()
@@ -47,14 +52,12 @@ class Player(BasePlayer):
     def get_response_fields(self):
         return ['response_1', 'response_2', 'response_3', 'response_4', 'response_5']
 
+    @property
+    def response(self):
+        return [self.response_1, self.response_2, self.response_3, self.response_4, self.response_5]
+
     def determine_outcome(self):
-        self.is_correct = (
-            self.response_1 == self.group.reference_table[self.group.word[0]] and
-            self.response_2 == self.group.reference_table[self.group.word[1]] and
-            self.response_3 == self.group.reference_table[self.group.word[2]] and
-            self.response_4 == self.group.reference_table[self.group.word[3]] and
-            self.response_5 == self.group.reference_table[self.group.word[4]]
-        )
+        self.is_correct = (self.response == self.group.correct_answer)
 
 
 def creating_session(subsession: Subsession):
