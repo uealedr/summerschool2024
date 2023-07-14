@@ -6,6 +6,11 @@
     The reference table is
     {{ group.table }}
 
+    In dictionary form it's
+    {{ for letter, value in group.reference_table.items }}
+    {{ letter }}: {{ value }}
+    {{ endfor }}
+
     The word to encrypt is
     {{ group.word }}
 

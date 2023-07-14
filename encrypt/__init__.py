@@ -1,3 +1,5 @@
+import string
+
 from otree.api import *
 
 
@@ -23,8 +25,15 @@ class Group(BaseGroup):
     word = models.StringField()
 
     def setup_round(self):
-        self.table = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.table = "ZYXJIUTLKQSRNWVHGFEDMOPCBA"
         self.word = "ZZYZX"
+
+    @property
+    def reference_table(self):
+        reference = {}
+        for letter in string.ascii_uppercase:
+            reference[letter] = self.table.index(letter) + 1
+        return reference
 
 
 class Player(BasePlayer):
