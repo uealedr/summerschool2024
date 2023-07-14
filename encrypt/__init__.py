@@ -1,5 +1,6 @@
 import random
 import string
+import time
 
 from otree.api import *
 
@@ -12,7 +13,7 @@ Implementation of encryption task.
 class C(BaseConstants):
     NAME_IN_URL = 'encrypt'
     PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 3
+    NUM_ROUNDS = 10
     TABLES = [
         "ZYXJIUTLKQSRNWVHGFEDMOPCBA",
         "ZYXWVUTSRQPONMLKJIHGFEDCBA",
@@ -22,6 +23,7 @@ class C(BaseConstants):
 
 class Subsession(BaseSubsession):
     payoff_per_correct = models.CurrencyField()
+    time_allowed = models.IntegerField()
     random_seed = models.IntegerField()
 
     def setup_round(self):
@@ -29,6 +31,7 @@ class Subsession(BaseSubsession):
             self.random_seed = self.session.config['encryption_seed']
             random.seed(self.random_seed)
         self.payoff_per_correct = Currency(self.session.config['payoff_per_correct'])
+        self.time_allowed = self.session.config.get('time_allowed', 20)
         for group in self.get_groups():
             group.setup_round()
 
@@ -55,6 +58,7 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
+    started_round = models.FloatField()
     response_1 = models.IntegerField()
     response_2 = models.IntegerField()
     response_3 = models.IntegerField()
@@ -86,6 +90,12 @@ class EncryptionPage(Page):
     @staticmethod
     def get_form_fields(player: Player):
         return player.get_response_fields()
+
+    @staticmethod
+    def get_timeout_seconds(player: Player):
+        if player.round_number == 1:
+            player.started_round = time.time()
+        return player.subsession.time_allowed - (time.time() - player.in_round(1).started_round)
 
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
