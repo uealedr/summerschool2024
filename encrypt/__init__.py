@@ -47,6 +47,15 @@ class Player(BasePlayer):
     def get_response_fields(self):
         return ['response_1', 'response_2', 'response_3', 'response_4', 'response_5']
 
+    def determine_outcome(self):
+        self.is_correct = (
+            self.response_1 == self.group.reference_table[self.group.word[0]] and
+            self.response_2 == self.group.reference_table[self.group.word[1]] and
+            self.response_3 == self.group.reference_table[self.group.word[2]] and
+            self.response_4 == self.group.reference_table[self.group.word[3]] and
+            self.response_5 == self.group.reference_table[self.group.word[4]]
+        )
+
 
 def creating_session(subsession: Subsession):
     subsession.setup_round()
@@ -59,6 +68,10 @@ class EncryptionPage(Page):
     @staticmethod
     def get_form_fields(player: Player):
         return player.get_response_fields()
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        player.determine_outcome()
 
 
 class Results(Page):
