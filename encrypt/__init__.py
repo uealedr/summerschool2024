@@ -15,7 +15,10 @@ class C(BaseConstants):
 
 
 class Subsession(BaseSubsession):
+    payoff_per_correct = models.CurrencyField()
+
     def setup_round(self):
+        self.payoff_per_correct = Currency(self.session.config['payoff_per_correct'])
         for group in self.get_groups():
             group.setup_round()
 
@@ -58,6 +61,8 @@ class Player(BasePlayer):
 
     def determine_outcome(self):
         self.is_correct = (self.response == self.group.correct_answer)
+        if self.is_correct:
+            self.payoff = self.subsession.payoff_per_correct
 
 
 def creating_session(subsession: Subsession):

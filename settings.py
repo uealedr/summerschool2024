@@ -7,6 +7,7 @@ SESSION_CONFIGS = [
             'encrypt',
         ],
         num_demo_participants=3,
+        payoff_per_correct="0.10",
     ),
 ]
 
