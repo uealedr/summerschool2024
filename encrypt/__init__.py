@@ -42,7 +42,11 @@ def creating_session(subsession: Subsession):
 
 # PAGES
 class EncryptionPage(Page):
-    pass
+    form_model = 'player'
+
+    @staticmethod
+    def get_form_fields(player: Player):
+        return ['response_1', 'response_2', 'response_3', 'response_4', 'response_5']
 
 
 class Results(Page):
