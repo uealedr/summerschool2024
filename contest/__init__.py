@@ -12,7 +12,7 @@ class C(BaseConstants):
     NAME_IN_URL = 'contest'
     PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 2
-    ENDOWMENT = 20
+    ENDOWMENT = [20, 30]
     EXCHANGE_VALUE = Currency(1)
     PRIZE = Currency(20)
 
@@ -33,6 +33,9 @@ class Group(BaseGroup):
 
     def setup_round(self):
         is_sequential = False
+        players = sorted(self.get_players(), key=lambda p: p.effort_score)
+        players[0].endowment = C.ENDOWMENT[0]
+        players[1].endowment = C.ENDOWMENT[1]
         for player in self.get_players():
             player.setup_round()
 
@@ -59,7 +62,6 @@ class Player(BasePlayer):
     earnings = models.CurrencyField(initial=Currency(0))
 
     def setup_round(self):
-        self.endowment = C.ENDOWMENT
         self.exchange_value = C.EXCHANGE_VALUE
 
     @property
@@ -71,12 +73,30 @@ class Player(BasePlayer):
         if self.subsession.is_paid:
             self.payoff = self.earnings
 
-
-def creating_session(subsession: Subsession):
-    subsession.setup_round()
-
+    @property
+    def effort_score(self):
+        try:
+            return self.participant.effort_score
+        except KeyError:
+            if self.id_in_group == 2:
+                return 2
+            else:
+                return 1
 
 # PAGES
+class SetupContest(WaitPage):
+    wait_for_all_groups = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def after_all_players_arrive(subsession):
+        for subs in subsession.in_all_rounds():
+            subs.setup_round()
+
+
 class EnterTickets(Page):
     form_model = 'player'
 
@@ -96,6 +116,7 @@ class Results(Page):
 
 
 page_sequence = [
+    SetupContest,
     EnterTickets,
     ResultsWaitPage,
     Results

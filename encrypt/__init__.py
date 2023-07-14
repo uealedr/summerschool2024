@@ -138,6 +138,10 @@ class Results(Page):
     def is_displayed(player: Player):
         return player.round_number == C.NUM_ROUNDS
 
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened):
+        player.participant.effort_score = player.total_correct
+
 
 page_sequence = [
     EncryptionPage,

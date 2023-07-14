@@ -17,6 +17,16 @@ SESSION_CONFIGS = [
         ],
         num_demo_participants=2,
     ),
+    dict(
+        name='combined',
+        app_sequence=[
+            'encrypt',
+            'contest',
+        ],
+        payoff_per_correct="0.10",
+        encryption_seed=12345,
+        num_demo_participants=2,
+    ),
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
@@ -28,7 +38,7 @@ SESSION_CONFIG_DEFAULTS = dict(
     real_world_currency_per_point=1.00, participation_fee=0.00, doc=""
 )
 
-PARTICIPANT_FIELDS = []
+PARTICIPANT_FIELDS = ['effort_score']
 SESSION_FIELDS = []
 
 # ISO-639 code
