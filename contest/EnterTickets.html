@@ -1,12 +1,32 @@
 {{ block title }}
-    Page title
+    Round {{ player.round_number }} of {{ C.NUM_ROUNDS }}
 {{ endblock }}
+
 {{ block content }}
 
-    Your endowment is {{ player.endowment }}.
+    <p class="fs-4 text-center">
+        You have <span class="fw-bold">{{ player.endowment }} tickets</span>.
+    </p>
+    <p class="fs-4 text-center">
+        Each of these tickets can either be entered into the contest, or exchanged
+        for {{ player.exchange_value }}.
+    </p>
 
-    Effort score: {{ player.effort_score }}
-    {{ formfields }}
-    {{ next_button }}
+    <p class="fs-4 align-content-center text-center">
+        How many tickets would you like to enter into the contest?
+        </p>
+
+    <p align="center">
+    <input type="number" class="form-control" inputmode="numeric"
+           id="id_tickets_entered" min="0" max="{{ player.endowment }}"
+           name="tickets_entered" required value="">
+    </p>
+
+    <div class="row justify-content-center">
+        <button class="otree-btn-next btn btn-primary w-25">
+            Confirm choice
+        </button>
+    </div>
+
 
 {{ endblock }}
