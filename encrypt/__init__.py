@@ -124,6 +124,7 @@ class EncryptionPage(Page):
 
     @staticmethod
     def get_timeout_seconds(player: Player):
+        return None
         if player.round_number == 1:
             player.started_round = time.time()
         return player.time_remaining

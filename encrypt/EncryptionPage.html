@@ -1,24 +1,66 @@
 {{ block title }}
-    Page title
+    Task number {{ player.round_number }}
 {{ endblock }}
+
+{{ block styles }}
+<style>
+    .the-word {
+        color: hotpink;
+        background-color: #ddd;
+        border: brown;
+    }
+    .the-word:hover {
+        scale: 200%;
+    }
+
+    #encryption-prompt {
+        color: dodgerblue;
+    }
+
+    td {
+        color: darkgreen;
+    }
+
+</style>
+
+{{ endblock }}
+
 {{ block content }}
 
-    You score so far: {{ player.total_correct }} out of {{ player.total_attempted }}.
+    <table class="table">
+        <tr>
+            {{ for letter, value in group.reference_table.items }}
+            <td>
+                {{ letter }}
+            </td>
+            {{ endfor }}
+        </tr>
+        <tr>
+            {{ for letter, value in group.reference_table.items }}
+            <td>
+                {{ value }}
+            </td>
+            {{ endfor }}
+        </tr>
+    </table>
 
-    The reference table is
-    {{ group.table }}
+    <p id="encryption-prompt" class="fs-4 text-center">
+        The word to encrypt is
+    </p>
+    <p class="fs-3 fw-bold text-center the-word">
+        {{ group.word }}
+    </p>
 
-    In dictionary form it's
-    {{ for letter, value in group.reference_table.items }}
-    {{ letter }}: {{ value }}
-    {{ endfor }}
+    <div class="row">
+        <div class="col-1"></div>
+        {{ for field in form }}
+        <div class="col-2">
+            {{ field }}
+        </div>
+        {{ endfor }}
+                <div class="col-1"></div>
+    </div>
 
-    The word to encrypt is
-    {{ group.word }}
-
-    Remember you get {{ subsession.payoff_per_correct }} if you get this right!
-
-    {{ formfields }}
-    {{ next_button }}
+     {{ next_button }}
 
 {{ endblock }}
