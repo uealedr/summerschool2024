@@ -1,3 +1,4 @@
+import random
 import string
 
 from otree.api import *
@@ -12,12 +13,21 @@ class C(BaseConstants):
     NAME_IN_URL = 'encrypt'
     PLAYERS_PER_GROUP = None
     NUM_ROUNDS = 3
+    TABLES = [
+        "ZYXJIUTLKQSRNWVHGFEDMOPCBA",
+        "ZYXWVUTSRQPONMLKJIHGFEDCBA",
+        "BADCFEHGJILKNMPORQTSVUXWZY",
+    ]
 
 
 class Subsession(BaseSubsession):
     payoff_per_correct = models.CurrencyField()
+    random_seed = models.IntegerField()
 
     def setup_round(self):
+        if self.round_number == 1:
+            self.random_seed = self.session.config['encryption_seed']
+            random.seed(self.random_seed)
         self.payoff_per_correct = Currency(self.session.config['payoff_per_correct'])
         for group in self.get_groups():
             group.setup_round()
@@ -28,8 +38,8 @@ class Group(BaseGroup):
     word = models.StringField()
 
     def setup_round(self):
-        self.table = "ZYXJIUTLKQSRNWVHGFEDMOPCBA"
-        self.word = "ZZYZX"
+        self.table = random.choice(C.TABLES)
+        self.word = random.choices(string.ascii_uppercase, k=5)
 
     @property
     def reference_table(self):

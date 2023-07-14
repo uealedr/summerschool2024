@@ -8,6 +8,7 @@ SESSION_CONFIGS = [
         ],
         num_demo_participants=3,
         payoff_per_correct="0.10",
+        encryption_seed=12345,
     ),
 ]
 
