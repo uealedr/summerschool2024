@@ -32,7 +32,7 @@ class Group(BaseGroup):
     is_sequential = models.BooleanField()
 
     def setup_round(self):
-        is_sequential = False
+        self.is_sequential = False
         players = sorted(self.get_players(), key=lambda p: p.effort_score)
         players[0].endowment = C.ENDOWMENT[0]
         players[1].endowment = C.ENDOWMENT[1]
@@ -68,6 +68,10 @@ class Player(BasePlayer):
     def other_player(self):
         return self.get_others_in_group()[0]
 
+    @property
+    def is_second_mover(self):
+        return self.group.is_sequential and self.id_in_group == 2
+
     def determine_earnings(self):
         self.earnings = (self.endowment - self.tickets_entered) * self.exchange_value + self.amount_won
         if self.subsession.is_paid:
@@ -97,8 +101,30 @@ class SetupContest(WaitPage):
             subs.setup_round()
 
 
-class EnterTickets(Page):
+class EnterTickets1(Page):
     form_model = 'player'
+    template_name = 'contest/EnterTickets.html'
+
+    @staticmethod
+    def is_displayed(player):
+        return not player.group.is_sequential or player.id_in_group == 1
+
+    @staticmethod
+    def get_form_fields(player):
+        return ['tickets_entered']
+
+
+class FirstMoverWaitPage(WaitPage):
+    pass
+
+
+class EnterTickets2(Page):
+    form_model = 'player'
+    template_name = 'contest/EnterTickets.html'
+
+    @staticmethod
+    def is_displayed(player):
+        return player.is_second_mover
 
     @staticmethod
     def get_form_fields(player):
@@ -117,7 +143,9 @@ class Results(Page):
 
 page_sequence = [
     SetupContest,
-    EnterTickets,
+    EnterTickets1,
+    FirstMoverWaitPage,
+    EnterTickets2,
     ResultsWaitPage,
     Results
 ]
