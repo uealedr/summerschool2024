@@ -35,6 +35,9 @@ class Player(BasePlayer):
     response_5 = models.IntegerField()
     is_correct = models.BooleanField(initial=False)
 
+    def get_response_fields(self):
+        return ['response_1', 'response_2', 'response_3', 'response_4', 'response_5']
+
 
 def creating_session(subsession: Subsession):
     subsession.setup_round()
@@ -46,7 +49,7 @@ class EncryptionPage(Page):
 
     @staticmethod
     def get_form_fields(player: Player):
-        return ['response_1', 'response_2', 'response_3', 'response_4', 'response_5']
+        return player.get_response_fields()
 
 
 class Results(Page):
