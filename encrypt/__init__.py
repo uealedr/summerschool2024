@@ -9,19 +9,35 @@ Implementation of encryption task.
 class C(BaseConstants):
     NAME_IN_URL = 'encrypt'
     PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 3
 
 
 class Subsession(BaseSubsession):
-    pass
+    def setup_round(self):
+        for group in self.get_groups():
+            group.setup_round()
 
 
 class Group(BaseGroup):
-    pass
+    table = models.StringField()
+    word = models.StringField()
+
+    def setup_round(self):
+        self.table = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.word = "ZZYZX"
 
 
 class Player(BasePlayer):
-    pass
+    response_1 = models.IntegerField()
+    response_2 = models.IntegerField()
+    response_3 = models.IntegerField()
+    response_4 = models.IntegerField()
+    response_5 = models.IntegerField()
+    is_correct = models.BooleanField(initial=False)
+
+
+def creating_session(subsession: Subsession):
+    subsession.setup_round()
 
 
 # PAGES
