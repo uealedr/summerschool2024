@@ -37,8 +37,12 @@ class Group(BaseGroup):
         for player in self.get_players():
             for _ in range(player.tickets_entered):
                 tickets.append(player)
-        self.ticket_drawn = random.randint(1, len(tickets))
-        tickets[self.ticket_drawn - 1].amount_won = C.PRIZE
+        if len(tickets) > 0:
+            self.ticket_drawn = random.randint(1, len(tickets))
+            tickets[self.ticket_drawn - 1].amount_won = C.PRIZE
+        else:
+            self.ticket_drawn = 0
+            random.choice(self.get_players()).amount_won = C.PRIZE
 
 
 class Player(BasePlayer):
