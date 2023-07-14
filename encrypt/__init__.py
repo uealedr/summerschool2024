@@ -73,10 +73,37 @@ class Player(BasePlayer):
     def response(self):
         return [self.response_1, self.response_2, self.response_3, self.response_4, self.response_5]
 
-    def determine_outcome(self):
-        self.is_correct = (self.response == self.group.correct_answer)
-        if self.is_correct:
-            self.payoff = self.subsession.payoff_per_correct
+    @property
+    def time_remaining(self):
+        return self.subsession.time_allowed - (time.time() - self.in_round(1).started_round)
+
+    def determine_outcome(self, timeout_happened):
+        if timeout_happened:
+            self.response_1 = None
+            self.response_2 = None
+            self.response_3 = None
+            self.response_4 = None
+            self.response_5 = None
+        else:
+            self.is_correct = (self.response == self.group.correct_answer)
+            if self.is_correct:
+                self.payoff = self.subsession.payoff_per_correct
+
+    @property
+    def total_correct(self):
+        return sum(p.is_correct for p in self.in_all_rounds())
+
+    @property
+    def attempted(self):
+        return self.field_maybe_none('response_1') is not None
+
+    @property
+    def total_attempted(self):
+        return sum(p.attempted for p in self.in_all_rounds())
+
+    @property
+    def total_payoff(self):
+        return sum(p.payoff for p in self.in_all_rounds())
 
 
 def creating_session(subsession: Subsession):
@@ -92,21 +119,27 @@ class EncryptionPage(Page):
         return player.get_response_fields()
 
     @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1 or player.time_remaining > 0
+
+    @staticmethod
     def get_timeout_seconds(player: Player):
         if player.round_number == 1:
             player.started_round = time.time()
-        return player.subsession.time_allowed - (time.time() - player.in_round(1).started_round)
+        return player.time_remaining
 
     @staticmethod
     def before_next_page(player: Player, timeout_happened):
-        player.determine_outcome()
+        player.determine_outcome(timeout_happened)
 
 
 class Results(Page):
-    pass
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
 
 
 page_sequence = [
     EncryptionPage,
-    # Results,
+    Results,
 ]

@@ -1,9 +1,11 @@
 {{ block title }}
-    Page title
+    Results
 {{ endblock }}
 
 {{ block content }}
 
+    Your score: {{ player.total_correct }} out of {{ player.total_attempted }} attempted.
+    Your earnings:  {{ player.total_payoff }}.
     {{ next_button }}
 {{ endblock }}
 
