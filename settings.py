@@ -10,6 +10,13 @@ SESSION_CONFIGS = [
         payoff_per_correct="0.10",
         encryption_seed=12345,
     ),
+    dict(
+        name='contest_task',
+        app_sequence=[
+            'contest',
+        ],
+        num_demo_participants=2,
+    ),
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
