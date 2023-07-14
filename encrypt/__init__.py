@@ -39,7 +39,7 @@ class Group(BaseGroup):
 
     def setup_round(self):
         self.table = random.choice(C.TABLES)
-        self.word = random.choices(string.ascii_uppercase, k=5)
+        self.word = "".join(random.choices(string.ascii_uppercase, k=5))
 
     @property
     def reference_table(self):
