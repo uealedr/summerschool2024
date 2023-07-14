@@ -11,14 +11,18 @@ Tullock contest app
 class C(BaseConstants):
     NAME_IN_URL = 'contest'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 2
     ENDOWMENT = 20
     EXCHANGE_VALUE = Currency(1)
     PRIZE = Currency(20)
 
 
 class Subsession(BaseSubsession):
+    is_paid = models.BooleanField(initial=False)
+
     def setup_round(self):
+        if self.round_number == 1:
+            self.is_paid = True
         for group in self.get_groups():
             group.setup_round()
 
@@ -43,6 +47,8 @@ class Group(BaseGroup):
         else:
             self.ticket_drawn = 0
             random.choice(self.get_players()).amount_won = C.PRIZE
+        for player in self.get_players():
+            player.determine_earnings()
 
 
 class Player(BasePlayer):
@@ -50,6 +56,7 @@ class Player(BasePlayer):
     exchange_value = models.CurrencyField()
     tickets_entered = models.IntegerField()
     amount_won = models.CurrencyField(initial=Currency(0))
+    earnings = models.CurrencyField(initial=Currency(0))
 
     def setup_round(self):
         self.endowment = C.ENDOWMENT
@@ -58,6 +65,12 @@ class Player(BasePlayer):
     @property
     def other_player(self):
         return self.get_others_in_group()[0]
+
+    def determine_earnings(self):
+        self.earnings = (self.endowment - self.tickets_entered) * self.exchange_value + self.amount_won
+        if self.subsession.is_paid:
+            self.payoff = self.earnings
+
 
 def creating_session(subsession: Subsession):
     subsession.setup_round()
