@@ -12,8 +12,8 @@ class C(BaseConstants):
     NAME_IN_URL = 'contest'
     PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 2
-    ENDOWMENT = [20, 30]
-    EXCHANGE_VALUE = Currency(1)
+    ENDOWMENT = 20
+    COST_PER_TICKET = [1, 2]
     PRIZE = Currency(20)
 
 
@@ -21,8 +21,7 @@ class Subsession(BaseSubsession):
     is_paid = models.BooleanField(initial=False)
 
     def setup_round(self):
-        if self.round_number == 1:
-            self.is_paid = True
+        self.is_paid = self.session.config.get("contest_paid_round", 1) == self.round_number
         for group in self.get_groups():
             group.setup_round()
 
@@ -33,9 +32,10 @@ class Group(BaseGroup):
 
     def setup_round(self):
         self.is_sequential = False
-        players = sorted(self.get_players(), key=lambda p: p.effort_score)
-        players[0].endowment = C.ENDOWMENT[0]
-        players[1].endowment = C.ENDOWMENT[1]
+        for player, cost in zip(sorted(self.get_players(), key=lambda p: -p.effort_score),
+                                C.COST_PER_TICKET,
+                                strict=True):
+            player.cost_per_ticket = cost
         for player in self.get_players():
             player.setup_round()
 
@@ -44,7 +44,7 @@ class Group(BaseGroup):
         for player in self.get_players():
             for _ in range(player.tickets_entered):
                 tickets.append(player)
-        if len(tickets) > 0:
+        if tickets:
             self.ticket_drawn = random.randint(1, len(tickets))
             tickets[self.ticket_drawn - 1].amount_won = C.PRIZE
         else:
@@ -56,7 +56,7 @@ class Group(BaseGroup):
 
 class Player(BasePlayer):
     endowment = models.IntegerField()
-    exchange_value = models.CurrencyField()
+    cost_per_ticket = models.CurrencyField()
     tickets_entered = models.IntegerField()
     amount_won = models.CurrencyField(initial=Currency(0))
     earnings = models.CurrencyField(initial=Currency(0))
@@ -73,7 +73,7 @@ class Player(BasePlayer):
         return self.group.is_sequential and self.id_in_group == 2
 
     def determine_earnings(self):
-        self.earnings = (self.endowment - self.tickets_entered) * self.exchange_value + self.amount_won
+        self.earnings = (self.endowment - self.cost_per_ticket * self.tickets_entered) + self.amount_won
         if self.subsession.is_paid:
             self.payoff = self.earnings
 
