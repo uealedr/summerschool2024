@@ -77,6 +77,9 @@ class Player(BasePlayer):
     def time_remaining(self):
         return self.subsession.time_allowed - (time.time() - self.in_round(1).started_round)
 
+    def start_task(self) -> None:
+        self.started_round = time.time()
+
     def determine_outcome(self, timeout_happened):
         if timeout_happened:
             self.response_1 = None
@@ -110,7 +113,16 @@ def creating_session(subsession: Subsession):
     subsession.setup_round()
 
 
-# PAGES
+class StartTask(Page):
+    @staticmethod
+    def is_displayed(player: Player) -> bool:
+        return player.round_number == 1
+
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened: bool) -> None:
+        player.start_task()
+
+
 class EncryptionPage(Page):
     form_model = 'player'
 
@@ -124,9 +136,6 @@ class EncryptionPage(Page):
 
     @staticmethod
     def get_timeout_seconds(player: Player):
-        return None
-        if player.round_number == 1:
-            player.started_round = time.time()
         return player.time_remaining
 
     @staticmethod
@@ -145,6 +154,7 @@ class Results(Page):
 
 
 page_sequence = [
+    StartTask,
     EncryptionPage,
     Results,
 ]
