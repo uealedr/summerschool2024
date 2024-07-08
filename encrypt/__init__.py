@@ -31,7 +31,7 @@ class Subsession(BaseSubsession):
             self.random_seed = self.session.config['encryption_seed']
             random.seed(self.random_seed)
         self.payoff_per_correct = Currency(self.session.config['payoff_per_correct'])
-        self.time_allowed = self.session.config.get('time_allowed', 20)
+        self.time_allowed = self.session.config.get('time_allowed', 20000)
         for group in self.get_groups():
             group.setup_round()
 
